@@ -4,11 +4,42 @@ export = plugin(
   function containerQueries({ matchUtilities, matchVariant, theme }) {
     let values: Record<string, string> = theme('containers') ?? {}
 
-    function parseValue(value: string) {
-      let numericValue = value.match(/^(\d+\.\d+|\d+|\.\d+)\D+/)?.[1] ?? null
-      if (numericValue === null) return null
+    function removeBraces(value: string): string {
+      let matched = value.match(/^\((?<body>.+)\)$/)
+      let { body } = matched?.groups ?? {}
+      return body ?? ""
+    }
 
-      return parseFloat(value)
+    function extractCondition(raw: string): string | null {
+      if (raw.startsWith("(")) return extractCondition(removeBraces(raw));
+
+      let matched = raw.match(/^((?<property>.+):)?(?<value>(\d+\.\d+|\d+|\.\d+)\D+)$/)
+      let { property, value } = matched?.groups ?? {}
+      if (value === undefined) return null
+
+      let isInvalid = Number.isNaN(Number.parseFloat(value))
+      if (isInvalid) return null
+
+      return `(${property ?? 'min-width'}: ${value})`
+    }
+
+    function extractConditions(raw: string): string | null {
+      if (!raw.includes("_and_")) return extractCondition(raw)
+
+      const extractedConditions = raw.split("_and_").flatMap((condition) => {
+        let matched = condition.match(/^\((?<body>.+)\)$/)
+        let { body } = matched?.groups ?? {}
+        if (body === undefined) return []
+
+        const extracted = extractCondition(body)
+        if (extracted === null) return []
+
+        return [extracted]
+      })
+
+      if (extractedConditions.length === 0) return null
+
+      return extractedConditions.join(' and ')
     }
 
     matchUtilities(
@@ -32,9 +63,10 @@ export = plugin(
     matchVariant(
       '@',
       (value = '', { modifier }) => {
-        let parsed = parseValue(value)
+        let conditions = extractConditions(value)
+        if (conditions === null) return []
 
-        return parsed !== null ? `@container ${modifier ?? ''} (min-width: ${value})` : []
+        return `@container ${modifier ?? ''} ${conditions}`
       },
       {
         values,
