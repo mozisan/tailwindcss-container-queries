@@ -7,7 +7,7 @@ it('container queries', () => {
       {
         raw: html`
           <div
-            class="@container @container-normal @container/sidebar @container-normal/sidebar @container-[size]/sidebar"
+            class="@container @container-size @container-normal @container/sidebar @container-normal/sidebar @container-[size]/sidebar"
           >
             <div class="@md:underline"></div>
             <div class="@md/container1:underline"></div>
@@ -52,6 +52,10 @@ it('container queries', () => {
     expect(result.css).toMatchFormattedCss(css`
       .\@container {
         container-type: inline-size;
+      }
+
+      .\@container-size {
+        container-type: size;
       }
 
       .\@container-normal {

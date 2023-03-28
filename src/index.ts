@@ -23,6 +23,7 @@ export = plugin(
       {
         values: {
           DEFAULT: 'inline-size',
+          size: 'size',
           normal: 'normal',
         },
         modifiers: 'any',
