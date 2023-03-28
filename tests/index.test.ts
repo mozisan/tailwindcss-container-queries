@@ -249,3 +249,104 @@ it('should be possible to use default container queries', () => {
     `)
   })
 })
+
+it('should be possible to specify multiple conditions', () => {
+  let config = {
+    content: [
+      {
+        raw: html`
+          <div>
+            <div class="@[10px]:underline"></div>
+            <div class="@[(min-width:100px)]:underline"></div>
+            <div class="@[(min-width:100px)_and_(max-width:200px)]:underline"></div>
+            <div
+              class="@[(min-width:100px)_and_(max-width:200px)_and_(min-height:100px)]:underline"
+            ></div>
+            <div
+              class="@[(min-width:100px)_and_(max-width:200px)_and_(min-height:100px)_and_(max-height:200px)]:underline"
+            ></div>
+            <div class="@[10px]/container1:underline"></div>
+            <div class="@[(min-width:100px)]/container1:underline"></div>
+            <div class="@[(min-width:100px)_and_(max-width:200px)]/container1:underline"></div>
+            <div
+              class="@[(min-width:100px)_and_(max-width:200px)_and_(min-height:100px)]/container1:underline"
+            ></div>
+            <div
+              class="@[(min-width:100px)_and_(max-width:200px)_and_(min-height:100px)_and_(max-height:200px)]/container1:underline"
+            ></div>
+          </div>
+        `,
+      },
+    ],
+    theme: {},
+    corePlugins: { preflight: false },
+  }
+
+  let input = css`
+    @tailwind utilities;
+  `
+
+  return run(input, config).then((result) => {
+    expect(result.css).toMatchFormattedCss(css`
+      @container (min-width: 10px) {
+        .\@\[10px\]\:underline {
+          text-decoration-line: underline;
+        }
+      }
+
+      @container (min-width: 100px) {
+        .\@\[\(min-width\:100px\)\]\:underline {
+          text-decoration-line: underline;
+        }
+      }
+
+      @container (min-width: 100px) and (max-width: 200px) {
+        .\@\[\(min-width\:100px\)_and_\(max-width\:200px\)\]\:underline {
+          text-decoration-line: underline;
+        }
+      }
+
+      @container (min-width: 100px) and (max-width: 200px) and (min-height: 100px) {
+        .\@\[\(min-width\:100px\)_and_\(max-width\:200px\)_and_\(min-height\:100px\)\]\:underline {
+          text-decoration-line: underline;
+        }
+      }
+
+      @container (min-width: 100px) and (max-width: 200px) and (min-height: 100px) and (max-height: 200px) {
+        .\@\[\(min-width\:100px\)_and_\(max-width\:200px\)_and_\(min-height\:100px\)_and_\(max-height\:200px\)\]\:underline {
+          text-decoration-line: underline;
+        }
+      }
+
+      @container container1 (min-width: 10px) {
+        .\@\[10px\]\/container1\:underline {
+          text-decoration-line: underline;
+        }
+      }
+
+      @container container1 (min-width: 100px) {
+        .\@\[\(min-width\:100px\)\]\/container1\:underline {
+          text-decoration-line: underline;
+        }
+      }
+
+      @container container1 (min-width: 100px) and (max-width: 200px) {
+        .\@\[\(min-width\:100px\)_and_\(max-width\:200px\)\]\/container1\:underline {
+          text-decoration-line: underline;
+        }
+      }
+
+      @container container1 (min-width: 100px) and (max-width: 200px) and (min-height: 100px) {
+        .\@\[\(min-width\:100px\)_and_\(max-width\:200px\)_and_\(min-height\:100px\)\]\/container1\:underline {
+          text-decoration-line: underline;
+        }
+      }
+
+      @container container1 (min-width: 100px) and (max-width: 200px) and (min-height: 100px) and (max-height: 200px) {
+        .\@\[\(min-width\:100px\)_and_\(max-width\:200px\)_and_\(min-height\:100px\)_and_\(max-height\:200px\)\]\/container1\:underline {
+          text-decoration-line: underline;
+        }
+      }
+    `)
+  })
+})
